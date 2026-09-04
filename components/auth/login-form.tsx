@@ -15,9 +15,11 @@ export default function LoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({ resolver: zodResolver(loginSchema) });
 
   useEffect(() => {
-    const errorCode = new URLSearchParams(window.location.search).get('error');
-    if (errorCode === 'CredentialsSignin') setError('The email or password is incorrect. In production, your email must also be verified.');
-  }, []);
+  const errorCode = new URLSearchParams(window.location.search).get("error");
+
+  if (errorCode === "CredentialsSignin")
+    setError("Invalid email or password.");
+}, []);
 
   async function onSubmit(values: LoginData) {
     if (loading) return;
