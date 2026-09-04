@@ -29,8 +29,9 @@ export const authOptions = {
         const user = identifier.includes("@")
           ? await prisma.user.findUnique({ where: { email: identifier } })
           : await prisma.user.findUnique({ where: { username: identifier } });
-
-        if (!user || !user.password || (process.env.NODE_ENV === "production" && user.email && !user.emailVerified)) return null;
+          if (!user || !user.password) {
+            return null;
+          }
 
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) return null;
