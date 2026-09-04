@@ -1,0 +1,272 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #000000;
+  --surface: #080808;
+  --elevated: #101010;
+  --border: #262626;
+  --primary-text: #ffffff;
+  --secondary-text: #8b949e;
+  --gold: #e3b341;
+  --success: #3fb950;
+  --danger: #f85149;
+  --max-width: 1200px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--primary-text);
+  font-family: var(--font-inter), sans-serif;
+  letter-spacing: -0.01em;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 20% 18%, rgba(227, 179, 65, 0.08), transparent 18%);
+  background-size: 32px 32px, 32px 32px, 100% 100%;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+  animation: background-drift 24s linear infinite;
+  opacity: 0.7;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22%3E%3Cg fill=%22%23ffffff%22 fill-opacity=%220.03%22%3E%3Ccircle cx=%2210%22 cy=%2210%22 r=%220.75%22/%3E%3Ccircle cx=%2228%22 cy=%2230%22 r=%220.65%22/%3E%3Ccircle cx=%2230%22 cy=%2218%22 r=%220.8%22/%3E%3C/g%3E%3C/svg%3E');
+  opacity: 0.55;
+  animation: background-pulse 8s ease-in-out infinite alternate;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-inter), sans-serif;
+  letter-spacing: -0.04em;
+}
+
+p,
+span,
+button,
+a,
+li,
+input,
+textarea,
+select {
+  font-family: var(--font-inter), sans-serif;
+}
+
+::selection {
+  background: rgba(227, 179, 65, 0.22);
+  color: var(--primary-text);
+}
+
+img,
+svg,
+canvas,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+a {
+  transition: border-color 220ms ease, background-color 220ms ease, transform 220ms ease, opacity 220ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.section-shell {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.card-surface {
+  background: #080808;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.muted {
+  color: var(--secondary-text);
+}
+
+.auth-brand-mark {
+  animation: auth-brand-pulse 2.8s ease-in-out infinite;
+}
+
+.auth-brand-name {
+  animation: auth-brand-reveal 700ms ease-out both;
+}
+
+.auth-spinner {
+  animation: auth-spin 700ms linear infinite;
+}
+
+@keyframes auth-brand-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 196, 81, 0.05); transform: translateY(0); }
+  50% { box-shadow: 0 0 0 7px rgba(245, 196, 81, 0.08), 0 0 28px rgba(245, 196, 81, 0.14); transform: translateY(-1px); }
+}
+
+@keyframes auth-brand-reveal {
+  from { opacity: 0; transform: translateX(-8px); letter-spacing: 0.08em; }
+  to { opacity: 1; transform: translateX(0); letter-spacing: -0.025em; }
+}
+
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+.gold-text {
+  color: var(--gold);
+}
+
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    transparent 100%
+  );
+  transform: translateY(-100%);
+  animation: scan 8s linear infinite;
+}
+
+.hero-card-glow {
+ isolation: isolate;
+ overflow: visible;
+ background: #ff0000;
+ animation:
+   hero-border-color 15s linear infinite,
+   hero-border-shadow 15s linear infinite;
+}
+
+.hero-card-glow::before {
+ content: '';
+ position: absolute;
+ inset: -1px;
+ z-index: -1;
+ border-radius: inherit;
+ background: #ff0000;
+ filter: blur(8px);
+ opacity: 0.32;
+ animation: hero-border-color 15s linear infinite;
+}
+
+@keyframes hero-border-color {
+ 0%, 100% { background-color: #ff0000; }
+ 33.333% { background-color: #00ff66; }
+ 66.666% { background-color: #ffd700; }
+}
+
+@keyframes hero-border-shadow {
+ 0%, 100% {
+   box-shadow: 0 0 24px rgba(255, 0, 0, 0.12), 0 0 58px rgba(255, 0, 0, 0.05);
+ }
+ 33.333% {
+   box-shadow: 0 0 24px rgba(0, 255, 102, 0.12), 0 0 58px rgba(0, 255, 102, 0.05);
+ }
+ 66.666% {
+   box-shadow: 0 0 24px rgba(255, 215, 0, 0.14), 0 0 58px rgba(255, 215, 0, 0.06);
+ }
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes background-drift {
+  0% { background-position: 0 0, 0 0, 0 0; }
+  100% { background-position: 32px 32px, 32px 32px, 0 0; }
+}
+
+@keyframes background-pulse {
+  from { opacity: 0.35; }
+  to { opacity: 0.65; }
+}
+
+.cursor-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+
+.cursor-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(227, 179, 65, 0.12), transparent 25%);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .section-shell {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-card-glow,
+    .hero-card-glow::before {
+      animation: none;
+    }
+
+    .hero-card-glow {
+      background: #ffd700;
+      box-shadow: 0 0 24px rgba(255, 215, 0, 0.12), 0 0 58px rgba(255, 215, 0, 0.05);
+    }
+
+    .hero-card-glow::before {
+      background: #ffd700;
+    }
+  }
+}

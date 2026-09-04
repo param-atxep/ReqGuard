@@ -1,0 +1,23 @@
+import { NextResponse } from "next/server";
+import prisma from "../../../lib/prisma";
+import { getServerSession } from "../../../lib/session";
+
+type SearchRow = { id: string; name: string; href: string; category: string; context: string | null; createdAt: Date };
+
+export async function GET(req: Request) {
+  const session = await getServerSession(req);
+  const userId = session?.user?.id as string | undefined;
+  if (!userId) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  const params = new URL(req.url).searchParams;
+  const q = params.get("q")?.trim() || "";
+  if (!q) return NextResponse.json({ results: [], grouped: {} });
+  const date = params.get("date");
+  const severity = params.get("severity");
+  const status = params.get("status");
+  const user = params.get("user");
+  const query = q.replace(/[^\w\s-]/g, " ").trim();
+  const results: SearchRow[] = date ? await prisma.$queryRawUnsafe(`SELECT * FROM (SELECT p.id, p.name, '/projects/' || p.id href, 'Projects' category, p.description context, p."createdAt" FROM "Project" p WHERE p."ownerId" = $2 AND to_tsvector('english', coalesce(p.name,'') || ' ' || coalesce(p.description,'')) @@ websearch_to_tsquery('english', $1) UNION ALL SELECT a.id, a."fileName", '/analysis/' || a.id, 'Analyses', a.summary, a."createdAt" FROM "Analysis" a WHERE a."ownerId" = $2 AND to_tsvector('english', coalesce(a."fileName",'') || ' ' || coalesce(a.summary,'')) @@ websearch_to_tsquery('english', $1) UNION ALL SELECT r.id, r.name, '/reports', 'Reports', null, r."createdAt" FROM "Report" r WHERE r."ownerId" = $2 AND to_tsvector('english', coalesce(r.name,'')) @@ websearch_to_tsquery('english', $1) UNION ALL SELECT f.id, f.title, '/issues', 'Issues', f.description, f."createdAt" FROM "Finding" f JOIN "Analysis" a ON a.id=f."analysisId" WHERE a."ownerId" = $2 AND to_tsvector('english', coalesce(f.title,'') || ' ' || coalesce(f.description,'')) @@ websearch_to_tsquery('english', $1) AND ($3::text IS NULL OR f.severity::text = $3) AND ($4::text IS NULL OR f.status::text = $4) UNION ALL SELECT u.id, u."fullName", '/users', 'Team members', u.username, u."createdAt" FROM "User" u WHERE u.id <> $2 AND to_tsvector('english', coalesce(u."fullName",'') || ' ' || coalesce(u.username,'')) @@ websearch_to_tsquery('english', $1) AND ($5::text IS NULL OR u.id = $5) UNION ALL SELECT al.id, al.title, '/history', 'Activities', al.message, al."createdAt" FROM "ActivityLog" al WHERE al."userId" = $2 AND to_tsvector('english', coalesce(al.title,'') || ' ' || coalesce(al.message,'')) @@ websearch_to_tsquery('english', $1)) results WHERE "createdAt" >= $6::timestamptz ORDER BY "createdAt" DESC LIMIT 60`, query, userId, severity, status, user, date)
+    : await prisma.$queryRawUnsafe(`SELECT * FROM (SELECT p.id, p.name, '/projects/' || p.id href, 'Projects' category, p.description context, p."createdAt" FROM "Project" p WHERE p."ownerId" = $2 AND to_tsvector('english', coalesce(p.name,'') || ' ' || coalesce(p.description,'')) @@ websearch_to_tsquery('english', $1) UNION ALL SELECT a.id, a."fileName", '/analysis/' || a.id, 'Analyses', a.summary, a."createdAt" FROM "Analysis" a WHERE a."ownerId" = $2 AND to_tsvector('english', coalesce(a."fileName",'') || ' ' || coalesce(a.summary,'')) @@ websearch_to_tsquery('english', $1) UNION ALL SELECT r.id, r.name, '/reports', 'Reports', null, r."createdAt" FROM "Report" r WHERE r."ownerId" = $2 AND to_tsvector('english', coalesce(r.name,'')) @@ websearch_to_tsquery('english', $1) UNION ALL SELECT f.id, f.title, '/issues', 'Issues', f.description, f."createdAt" FROM "Finding" f JOIN "Analysis" a ON a.id=f."analysisId" WHERE a."ownerId" = $2 AND to_tsvector('english', coalesce(f.title,'') || ' ' || coalesce(f.description,'')) @@ websearch_to_tsquery('english', $1) AND ($3::text IS NULL OR f.severity::text = $3) AND ($4::text IS NULL OR f.status::text = $4) UNION ALL SELECT u.id, u."fullName", '/users', 'Team members', u.username, u."createdAt" FROM "User" u WHERE u.id <> $2 AND to_tsvector('english', coalesce(u."fullName",'') || ' ' || coalesce(u.username,'')) @@ websearch_to_tsquery('english', $1) AND ($5::text IS NULL OR u.id = $5) UNION ALL SELECT al.id, al.title, '/history', 'Activities', al.message, al."createdAt" FROM "ActivityLog" al WHERE al."userId" = $2 AND to_tsvector('english', coalesce(al.title,'') || ' ' || coalesce(al.message,'')) @@ websearch_to_tsquery('english', $1)) results ORDER BY "createdAt" DESC LIMIT 60`, query, userId, severity, status, user);
+  const grouped = results.reduce<Record<string, SearchRow[]>>((groups, result) => { (groups[result.category] ||= []).push(result); return groups; }, {});
+  return NextResponse.json({ results, grouped });
+}

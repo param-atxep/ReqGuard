@@ -1,0 +1,12 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { Bot, Send, X } from "lucide-react";
+
+export default function SupportAssistant() {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<{ from: "bot" | "user"; text: string }[]>([{ from: "bot", text: "Hi! I can help with uploads, reports, severity, and workspace troubleshooting." }]);
+  async function send(e: FormEvent) { e.preventDefault(); if (!message.trim()) return; const current = message.trim(); setMessages((items) => [...items, { from: "user", text: current }]); setMessage(""); const response = await fetch("/api/support/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: current }) }); if (response.ok) { const result = await response.json(); setMessages((items) => [...items, { from: "bot", text: result.answer }]); } }
+  return <><button onClick={() => setOpen(true)} aria-label="Open AI support assistant" className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#e3b341] text-black shadow-lg shadow-[#e3b341]/20 hover:scale-105"><Bot size={24} /></button>{open && <section className="fixed bottom-5 right-5 z-50 flex h-[min(560px,calc(100vh-40px))] w-[min(380px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-white/[0.12] bg-[#101010] shadow-2xl"><header className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3"><div><p className="text-sm font-semibold">ReqGuard AI Assistant</p><p className="text-[11px] text-[#3fb950]">Available now</p></div><button onClick={() => setOpen(false)} className="text-[#8b949e]"><X size={18} /></button></header><div className="flex-1 space-y-3 overflow-y-auto p-4">{messages.map((item, index) => <div key={index} className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-5 ${item.from === "user" ? "ml-auto bg-[#e3b341] text-black" : "bg-white/[0.06] text-[#d1d5db]"}`}>{item.text}</div>)}</div><form onSubmit={send} className="flex gap-2 border-t border-white/[0.08] p-3"><input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Ask about ReqGuard..." className="min-w-0 flex-1 rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-2 text-sm outline-none" /><button className="rounded-lg bg-[#e3b341] px-3 text-black"><Send size={16} /></button></form></section>}</>;
+}
